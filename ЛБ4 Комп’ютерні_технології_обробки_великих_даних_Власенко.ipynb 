@@ -1,0 +1,347 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Dima200206/-2/blob/main/%D0%9B%D0%914%20%D0%9A%D0%BE%D0%BC%D0%BF%E2%80%99%D1%8E%D1%82%D0%B5%D1%80%D0%BD%D1%96_%D1%82%D0%B5%D1%85%D0%BD%D0%BE%D0%BB%D0%BE%D0%B3%D1%96%D1%97_%D0%BE%D0%B1%D1%80%D0%BE%D0%B1%D0%BA%D0%B8_%D0%B2%D0%B5%D0%BB%D0%B8%D0%BA%D0%B8%D1%85_%D0%B4%D0%B0%D0%BD%D0%B8%D1%85_%D0%92%D0%BB%D0%B0%D1%81%D0%B5%D0%BD%D0%BA%D0%BE.ipynb%20\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Лабораторна 4"
+      ],
+      "metadata": {
+        "id": "9gMuFu61d2BX"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "1 Чстина"
+      ],
+      "metadata": {
+        "id": "PfRObtyle1aH"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Встановлення та імпорт бібліотек\n",
+        "!pip install pyspark\n",
+        "\n",
+        "from pyspark.sql import SparkSession\n",
+        "from pyspark.sql.types import StructType, StructField, StringType, IntegerType\n",
+        "\n",
+        "# 1️ Створюємо сесію Spark\n",
+        "spark = SparkSession.builder.master(\"local\").appName(\"Lab4_Task1\").getOrCreate()\n",
+        "\n",
+        "# 2️ Створюємо дані вручну з вкладеною структурою (складна структура)\n",
+        "# Наприклад: інформація про працівників — ім’я (з підструктурою), посада, відділ, зарплата\n",
+        "\n",
+        "data = [\n",
+        "    ((\"James\", \"B\", \"Smith\"), \"IT\", \"Developer\", 3500),\n",
+        "    ((\"Maria\", \"Anne\", \"Jones\"), \"HR\", \"Manager\", 4200),\n",
+        "    ((\"Michael\", \"Rose\", \"\"), \"Finance\", \"Analyst\", 3900),\n",
+        "    ((\"Jen\", \"Mary\", \"Brown\"), \"IT\", \"Designer\", 3100),\n",
+        "    ((\"Robert\", \"\", \"Williams\"), \"Marketing\", \"Specialist\", 3700)\n",
+        "]\n",
+        "\n",
+        "# 3️ Описуємо схему (структуру даних)\n",
+        "schema = StructType([\n",
+        "    StructField(\"name\", StructType([\n",
+        "        StructField(\"firstname\", StringType(), True),\n",
+        "        StructField(\"middlename\", StringType(), True),\n",
+        "        StructField(\"lastname\", StringType(), True)\n",
+        "    ])),\n",
+        "    StructField(\"department\", StringType(), True),\n",
+        "    StructField(\"position\", StringType(), True),\n",
+        "    StructField(\"salary\", IntegerType(), True)\n",
+        "])\n",
+        "\n",
+        "# 4️ Створюємо DataFrame із зазначеною схемою\n",
+        "df = spark.createDataFrame(data=data, schema=schema)\n",
+        "\n",
+        "# 5️ Виводимо DataFrame\n",
+        "print(\" Вміст DataFrame:\")\n",
+        "df.show(truncate=False)\n",
+        "\n",
+        "# 6️ Виводимо схему\n",
+        "print(\" Схема DataFrame:\")\n",
+        "df.printSchema()\n",
+        "\n",
+        "# 7️ Демонстрація роботи collect()\n",
+        "print(\" Результат df.collect():\")\n",
+        "all_rows = df.collect()\n",
+        "for row in all_rows:\n",
+        "    print(row)\n",
+        "\n",
+        "# 8️ Приклади доступу до окремих елементів\n",
+        "print(\"\\nПерший рядок повністю:\")\n",
+        "print(df.collect()[0])\n",
+        "\n",
+        "print(\"\\nІм’я (підструктура) з першого рядка:\")\n",
+        "print(df.collect()[0]['name'])\n",
+        "\n",
+        "print(\"\\nІм’я (firstname) з першого рядка:\")\n",
+        "print(df.collect()[0]['name']['firstname'])\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Dn-BPMbQZXZz",
+        "outputId": "fb58afc5-0e09-4ad1-a560-f2087c53984b"
+      },
+      "execution_count": 1,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: pyspark in /usr/local/lib/python3.12/dist-packages (3.5.1)\n",
+            "Requirement already satisfied: py4j==0.10.9.7 in /usr/local/lib/python3.12/dist-packages (from pyspark) (0.10.9.7)\n",
+            " Вміст DataFrame:\n",
+            "+--------------------+----------+----------+------+\n",
+            "|name                |department|position  |salary|\n",
+            "+--------------------+----------+----------+------+\n",
+            "|{James, B, Smith}   |IT        |Developer |3500  |\n",
+            "|{Maria, Anne, Jones}|HR        |Manager   |4200  |\n",
+            "|{Michael, Rose, }   |Finance   |Analyst   |3900  |\n",
+            "|{Jen, Mary, Brown}  |IT        |Designer  |3100  |\n",
+            "|{Robert, , Williams}|Marketing |Specialist|3700  |\n",
+            "+--------------------+----------+----------+------+\n",
+            "\n",
+            " Схема DataFrame:\n",
+            "root\n",
+            " |-- name: struct (nullable = true)\n",
+            " |    |-- firstname: string (nullable = true)\n",
+            " |    |-- middlename: string (nullable = true)\n",
+            " |    |-- lastname: string (nullable = true)\n",
+            " |-- department: string (nullable = true)\n",
+            " |-- position: string (nullable = true)\n",
+            " |-- salary: integer (nullable = true)\n",
+            "\n",
+            " Результат df.collect():\n",
+            "Row(name=Row(firstname='James', middlename='B', lastname='Smith'), department='IT', position='Developer', salary=3500)\n",
+            "Row(name=Row(firstname='Maria', middlename='Anne', lastname='Jones'), department='HR', position='Manager', salary=4200)\n",
+            "Row(name=Row(firstname='Michael', middlename='Rose', lastname=''), department='Finance', position='Analyst', salary=3900)\n",
+            "Row(name=Row(firstname='Jen', middlename='Mary', lastname='Brown'), department='IT', position='Designer', salary=3100)\n",
+            "Row(name=Row(firstname='Robert', middlename='', lastname='Williams'), department='Marketing', position='Specialist', salary=3700)\n",
+            "\n",
+            "Перший рядок повністю:\n",
+            "Row(name=Row(firstname='James', middlename='B', lastname='Smith'), department='IT', position='Developer', salary=3500)\n",
+            "\n",
+            "Ім’я (підструктура) з першого рядка:\n",
+            "Row(firstname='James', middlename='B', lastname='Smith')\n",
+            "\n",
+            "Ім’я (firstname) з першого рядка:\n",
+            "James\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "2 Частина"
+      ],
+      "metadata": {
+        "id": "1l55CN3Qd1WP"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Встановлення бібліотек\n",
+        "!pip install pyspark yfinance\n",
+        "\n",
+        "from pyspark.sql import SparkSession\n",
+        "from pyspark.sql.functions import col, avg, max, min, year, month, count\n",
+        "import yfinance as yf\n",
+        "import pandas as pd\n",
+        "\n",
+        "# 1️ Створюємо SparkSession\n",
+        "spark = SparkSession.builder.master(\"local\").appName(\"Lab4_Part2_Fix\").getOrCreate()\n",
+        "\n",
+        "# 2️ Завантажуємо дані з Yahoo Finance (наприклад, Microsoft)\n",
+        "data = yf.download(\"MSFT\", start=\"2005-01-01\", end=\"2025-01-01\")\n",
+        "\n",
+        "# Перетворюємо pandas → Spark DataFrame\n",
+        "df = spark.createDataFrame(data.reset_index())\n",
+        "\n",
+        "# Перевіряємо назви колонок\n",
+        "print(\" Стовпці DataFrame:\", df.columns)\n",
+        "\n",
+        "# Перевіряємо схему\n",
+        "df.printSchema()\n",
+        "\n",
+        "# 3️ Перегляд перших 10 рядків\n",
+        "df.show(10, truncate=False)\n",
+        "\n",
+        "# 4️ Перейменуємо колонки без пробілів (якщо потрібно)\n",
+        "# (іноді yfinance повертає 'Adj Close' замість 'Adj_Close')\n",
+        "for c in df.columns:\n",
+        "    if \" \" in c:\n",
+        "        df = df.withColumnRenamed(c, c.replace(\" \", \"_\"))\n",
+        "\n",
+        "# Перевіряємо ще раз\n",
+        "print(\" Оновлені колонки:\", df.columns)\n",
+        "\n",
+        "# 5️ Тепер створюємо колонку HV Ratio (High / Volume)\n",
+        "df_ratio = df.withColumn(\"HV_Ratio\", col(\"High\") / col(\"Volume\"))\n",
+        "\n",
+        "print(\" DataFrame із колонкою HV_Ratio:\")\n",
+        "df_ratio.select(\"Date\", \"High\", \"Volume\", \"HV_Ratio\").show(5)\n",
+        "\n",
+        "# 6️ Знаходимо день пікової ціни\n",
+        "max_high_row = df_ratio.orderBy(col(\"High\").desc()).first()\n",
+        "print(f\" День пікової ціни: {max_high_row['Date']} (High = {max_high_row['High']:.2f})\")\n",
+        "\n",
+        "# 7️ Середнє значення Close\n",
+        "avg_close = df_ratio.select(avg(\"Close\")).collect()[0][0]\n",
+        "print(f\" Середнє значення Close: {avg_close:.2f}\")\n",
+        "\n",
+        "# 8️ Максимальний і мінімальний обсяг торгів\n",
+        "max_volume = df_ratio.select(max(\"Volume\")).collect()[0][0]\n",
+        "min_volume = df_ratio.select(min(\"Volume\")).collect()[0][0]\n",
+        "print(f\" Максимальний обсяг: {max_volume:,}\")\n",
+        "print(f\" Мінімальний обсяг: {min_volume:,}\")\n",
+        "\n",
+        "# 9️ Кількість днів, коли Close < 60$\n",
+        "days_below_60 = df_ratio.filter(col(\"Close\") < 60).count()\n",
+        "total_days = df_ratio.count()\n",
+        "print(f\" Днів, коли Close < 60$: {days_below_60} із {total_days}\")\n",
+        "\n",
+        "# 10 Відсоток днів, коли High > 80$\n",
+        "days_high_over_80 = df_ratio.filter(col(\"High\") > 80).count()\n",
+        "percent_high_over_80 = (days_high_over_80 / total_days) * 100\n",
+        "print(f\" Відсоток днів, коли High > 80$: {percent_high_over_80:.2f}%\")\n",
+        "\n",
+        "# 11 Річний максимум High\n",
+        "df_ratio.groupBy(year(\"Date\").alias(\"Year\")).agg(max(\"High\").alias(\"Max_High\")).orderBy(\"Year\").show()\n",
+        "\n",
+        "# 12️ Середнє закриття по місяцях\n",
+        "df_ratio.groupBy(month(\"Date\").alias(\"Month\")).agg(avg(\"Close\").alias(\"Avg_Close\")).orderBy(\"Month\").show()\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 1000
+        },
+        "id": "QKn695wWebFH",
+        "outputId": "f825e6bc-82e6-49d9-dffa-3dc33ed055f4"
+      },
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: pyspark in /usr/local/lib/python3.12/dist-packages (3.5.1)\n",
+            "Requirement already satisfied: yfinance in /usr/local/lib/python3.12/dist-packages (0.2.66)\n",
+            "Requirement already satisfied: py4j==0.10.9.7 in /usr/local/lib/python3.12/dist-packages (from pyspark) (0.10.9.7)\n",
+            "Requirement already satisfied: pandas>=1.3.0 in /usr/local/lib/python3.12/dist-packages (from yfinance) (2.2.2)\n",
+            "Requirement already satisfied: numpy>=1.16.5 in /usr/local/lib/python3.12/dist-packages (from yfinance) (2.0.2)\n",
+            "Requirement already satisfied: requests>=2.31 in /usr/local/lib/python3.12/dist-packages (from yfinance) (2.32.4)\n",
+            "Requirement already satisfied: multitasking>=0.0.7 in /usr/local/lib/python3.12/dist-packages (from yfinance) (0.0.12)\n",
+            "Requirement already satisfied: platformdirs>=2.0.0 in /usr/local/lib/python3.12/dist-packages (from yfinance) (4.5.0)\n",
+            "Requirement already satisfied: pytz>=2022.5 in /usr/local/lib/python3.12/dist-packages (from yfinance) (2025.2)\n",
+            "Requirement already satisfied: frozendict>=2.3.4 in /usr/local/lib/python3.12/dist-packages (from yfinance) (2.4.6)\n",
+            "Requirement already satisfied: peewee>=3.16.2 in /usr/local/lib/python3.12/dist-packages (from yfinance) (3.18.2)\n",
+            "Requirement already satisfied: beautifulsoup4>=4.11.1 in /usr/local/lib/python3.12/dist-packages (from yfinance) (4.13.5)\n",
+            "Requirement already satisfied: curl_cffi>=0.7 in /usr/local/lib/python3.12/dist-packages (from yfinance) (0.13.0)\n",
+            "Requirement already satisfied: protobuf>=3.19.0 in /usr/local/lib/python3.12/dist-packages (from yfinance) (5.29.5)\n",
+            "Requirement already satisfied: websockets>=13.0 in /usr/local/lib/python3.12/dist-packages (from yfinance) (15.0.1)\n",
+            "Requirement already satisfied: soupsieve>1.2 in /usr/local/lib/python3.12/dist-packages (from beautifulsoup4>=4.11.1->yfinance) (2.8)\n",
+            "Requirement already satisfied: typing-extensions>=4.0.0 in /usr/local/lib/python3.12/dist-packages (from beautifulsoup4>=4.11.1->yfinance) (4.15.0)\n",
+            "Requirement already satisfied: cffi>=1.12.0 in /usr/local/lib/python3.12/dist-packages (from curl_cffi>=0.7->yfinance) (2.0.0)\n",
+            "Requirement already satisfied: certifi>=2024.2.2 in /usr/local/lib/python3.12/dist-packages (from curl_cffi>=0.7->yfinance) (2025.10.5)\n",
+            "Requirement already satisfied: python-dateutil>=2.8.2 in /usr/local/lib/python3.12/dist-packages (from pandas>=1.3.0->yfinance) (2.9.0.post0)\n",
+            "Requirement already satisfied: tzdata>=2022.7 in /usr/local/lib/python3.12/dist-packages (from pandas>=1.3.0->yfinance) (2025.2)\n",
+            "Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.12/dist-packages (from requests>=2.31->yfinance) (3.4.4)\n",
+            "Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.12/dist-packages (from requests>=2.31->yfinance) (3.11)\n",
+            "Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.12/dist-packages (from requests>=2.31->yfinance) (2.5.0)\n",
+            "Requirement already satisfied: pycparser in /usr/local/lib/python3.12/dist-packages (from cffi>=1.12.0->curl_cffi>=0.7->yfinance) (2.23)\n",
+            "Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.12/dist-packages (from python-dateutil>=2.8.2->pandas>=1.3.0->yfinance) (1.17.0)\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/tmp/ipython-input-2180239983.py:13: FutureWarning: YF.download() has changed argument auto_adjust default to True\n",
+            "  data = yf.download(\"MSFT\", start=\"2005-01-01\", end=\"2025-01-01\")\n",
+            "\r[*********************100%***********************]  1 of 1 completed\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            " Стовпці DataFrame: [\"('Date', '')\", \"('Close', 'MSFT')\", \"('High', 'MSFT')\", \"('Low', 'MSFT')\", \"('Open', 'MSFT')\", \"('Volume', 'MSFT')\"]\n",
+            "root\n",
+            " |-- ('Date', ''): timestamp (nullable = true)\n",
+            " |-- ('Close', 'MSFT'): double (nullable = true)\n",
+            " |-- ('High', 'MSFT'): double (nullable = true)\n",
+            " |-- ('Low', 'MSFT'): double (nullable = true)\n",
+            " |-- ('Open', 'MSFT'): double (nullable = true)\n",
+            " |-- ('Volume', 'MSFT'): long (nullable = true)\n",
+            "\n",
+            "+-------------------+------------------+------------------+------------------+------------------+------------------+\n",
+            "|('Date', '')       |('Close', 'MSFT') |('High', 'MSFT')  |('Low', 'MSFT')   |('Open', 'MSFT')  |('Volume', 'MSFT')|\n",
+            "+-------------------+------------------+------------------+------------------+------------------+------------------+\n",
+            "|2005-01-03 00:00:00|18.45488929748535 |18.599823668824055|18.392774754965412|18.496298553706474|65002900          |\n",
+            "|2005-01-04 00:00:00|18.52389144897461 |18.703333177332844|18.39966245885156 |18.544596719453622|109442100         |\n",
+            "|2005-01-05 00:00:00|18.482492446899414|18.703343521990988|18.46868892561213 |18.523901694385025|72463500          |\n",
+            "|2005-01-06 00:00:00|18.461790084838867|18.67573943312449 |18.385872022128037|18.53080638581449 |76890500          |\n",
+            "|2005-01-07 00:00:00|18.406570434570312|18.55840518692249 |18.372062955155354|18.510094189191157|68723300          |\n",
+            "|2005-01-10 00:00:00|18.496295928955078|18.537706495676275|18.31685540533523 |18.35826465568009 |70376600          |\n",
+            "|2005-01-11 00:00:00|18.447982788085938|18.510097314621675|18.36516429695574 |18.420377063167933|64712000          |\n",
+            "|2005-01-12 00:00:00|18.482492446899414|18.530803455028668|18.372066909353627|18.475590686255774|72940600          |\n",
+            "|2005-01-13 00:00:00|18.130512237548828|18.49629637102752 |18.05459417978848 |18.413477868358385|89861600          |\n",
+            "|2005-01-14 00:00:00|18.026987075805664|18.254739915335836|17.97177430611278 |18.220231111542617|92180800          |\n",
+            "+-------------------+------------------+------------------+------------------+------------------+------------------+\n",
+            "only showing top 10 rows\n",
+            "\n",
+            " Оновлені колонки: [\"('Date',_'')\", \"('Close',_'MSFT')\", \"('High',_'MSFT')\", \"('Low',_'MSFT')\", \"('Open',_'MSFT')\", \"('Volume',_'MSFT')\"]\n"
+          ]
+        },
+        {
+          "output_type": "error",
+          "ename": "AnalysisException",
+          "evalue": "[UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `High` cannot be resolved. Did you mean one of the following? [`('Date',_'')`, `('High',_'MSFT')`, `('Low',_'MSFT')`, `('Open',_'MSFT')`, `('Close',_'MSFT')`].;\n'Project [('Date',_'')#218, ('Close',_'MSFT')#225, ('High',_'MSFT')#232, ('Low',_'MSFT')#239, ('Open',_'MSFT')#246, ('Volume',_'MSFT')#253L, ('High / 'Volume) AS HV_Ratio#260]\n+- Project [('Date',_'')#218, ('Close',_'MSFT')#225, ('High',_'MSFT')#232, ('Low',_'MSFT')#239, ('Open',_'MSFT')#246, ('Volume', 'MSFT')#186L AS ('Volume',_'MSFT')#253L]\n   +- Project [('Date',_'')#218, ('Close',_'MSFT')#225, ('High',_'MSFT')#232, ('Low',_'MSFT')#239, ('Open', 'MSFT')#185 AS ('Open',_'MSFT')#246, ('Volume', 'MSFT')#186L]\n      +- Project [('Date',_'')#218, ('Close',_'MSFT')#225, ('High',_'MSFT')#232, ('Low', 'MSFT')#184 AS ('Low',_'MSFT')#239, ('Open', 'MSFT')#185, ('Volume', 'MSFT')#186L]\n         +- Project [('Date',_'')#218, ('Close',_'MSFT')#225, ('High', 'MSFT')#183 AS ('High',_'MSFT')#232, ('Low', 'MSFT')#184, ('Open', 'MSFT')#185, ('Volume', 'MSFT')#186L]\n            +- Project [('Date',_'')#218, ('Close', 'MSFT')#182 AS ('Close',_'MSFT')#225, ('High', 'MSFT')#183, ('Low', 'MSFT')#184, ('Open', 'MSFT')#185, ('Volume', 'MSFT')#186L]\n               +- Project [('Date', '')#181 AS ('Date',_'')#218, ('Close', 'MSFT')#182, ('High', 'MSFT')#183, ('Low', 'MSFT')#184, ('Open', 'MSFT')#185, ('Volume', 'MSFT')#186L]\n                  +- LogicalRDD [('Date', '')#181, ('Close', 'MSFT')#182, ('High', 'MSFT')#183, ('Low', 'MSFT')#184, ('Open', 'MSFT')#185, ('Volume', 'MSFT')#186L], false\n",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mAnalysisException\u001b[0m                         Traceback (most recent call last)",
+            "\u001b[0;32m/tmp/ipython-input-2180239983.py\u001b[0m in \u001b[0;36m<cell line: 0>\u001b[0;34m()\u001b[0m\n\u001b[1;32m     35\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     36\u001b[0m \u001b[0;31m# 5️ Тепер створюємо колонку HV Ratio (High / Volume)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 37\u001b[0;31m \u001b[0mdf_ratio\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mdf\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mwithColumn\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"HV_Ratio\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcol\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"High\"\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;34m/\u001b[0m \u001b[0mcol\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"Volume\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     38\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     39\u001b[0m \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\" DataFrame із колонкою HV_Ratio:\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.12/dist-packages/pyspark/sql/dataframe.py\u001b[0m in \u001b[0;36mwithColumn\u001b[0;34m(self, colName, col)\u001b[0m\n\u001b[1;32m   5172\u001b[0m                 \u001b[0mmessage_parameters\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m{\u001b[0m\u001b[0;34m\"arg_name\"\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0;34m\"col\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m\"arg_type\"\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0mtype\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mcol\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m__name__\u001b[0m\u001b[0;34m}\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   5173\u001b[0m             )\n\u001b[0;32m-> 5174\u001b[0;31m         \u001b[0;32mreturn\u001b[0m \u001b[0mDataFrame\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_jdf\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mwithColumn\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mcolName\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcol\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_jc\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0msparkSession\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   5175\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   5176\u001b[0m     \u001b[0;32mdef\u001b[0m \u001b[0mwithColumnRenamed\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mexisting\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0mstr\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mnew\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0mstr\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;34m->\u001b[0m \u001b[0;34m\"DataFrame\"\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.12/dist-packages/py4j/java_gateway.py\u001b[0m in \u001b[0;36m__call__\u001b[0;34m(self, *args)\u001b[0m\n\u001b[1;32m   1320\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1321\u001b[0m         \u001b[0manswer\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mgateway_client\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0msend_command\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mcommand\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 1322\u001b[0;31m         return_value = get_return_value(\n\u001b[0m\u001b[1;32m   1323\u001b[0m             answer, self.gateway_client, self.target_id, self.name)\n\u001b[1;32m   1324\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.12/dist-packages/pyspark/errors/exceptions/captured.py\u001b[0m in \u001b[0;36mdeco\u001b[0;34m(*a, **kw)\u001b[0m\n\u001b[1;32m    183\u001b[0m                 \u001b[0;31m# Hide where the exception came from that shows a non-Pythonic\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    184\u001b[0m                 \u001b[0;31m# JVM exception message.\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 185\u001b[0;31m                 \u001b[0;32mraise\u001b[0m \u001b[0mconverted\u001b[0m \u001b[0;32mfrom\u001b[0m \u001b[0;32mNone\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    186\u001b[0m             \u001b[0;32melse\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    187\u001b[0m                 \u001b[0;32mraise\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mAnalysisException\u001b[0m: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `High` cannot be resolved. Did you mean one of the following? [`('Date',_'')`, `('High',_'MSFT')`, `('Low',_'MSFT')`, `('Open',_'MSFT')`, `('Close',_'MSFT')`].;\n'Project [('Date',_'')#218, ('Close',_'MSFT')#225, ('High',_'MSFT')#232, ('Low',_'MSFT')#239, ('Open',_'MSFT')#246, ('Volume',_'MSFT')#253L, ('High / 'Volume) AS HV_Ratio#260]\n+- Project [('Date',_'')#218, ('Close',_'MSFT')#225, ('High',_'MSFT')#232, ('Low',_'MSFT')#239, ('Open',_'MSFT')#246, ('Volume', 'MSFT')#186L AS ('Volume',_'MSFT')#253L]\n   +- Project [('Date',_'')#218, ('Close',_'MSFT')#225, ('High',_'MSFT')#232, ('Low',_'MSFT')#239, ('Open', 'MSFT')#185 AS ('Open',_'MSFT')#246, ('Volume', 'MSFT')#186L]\n      +- Project [('Date',_'')#218, ('Close',_'MSFT')#225, ('High',_'MSFT')#232, ('Low', 'MSFT')#184 AS ('Low',_'MSFT')#239, ('Open', 'MSFT')#185, ('Volume', 'MSFT')#186L]\n         +- Project [('Date',_'')#218, ('Close',_'MSFT')#225, ('High', 'MSFT')#183 AS ('High',_'MSFT')#232, ('Low', 'MSFT')#184, ('Open', 'MSFT')#185, ('Volume', 'MSFT')#186L]\n            +- Project [('Date',_'')#218, ('Close', 'MSFT')#182 AS ('Close',_'MSFT')#225, ('High', 'MSFT')#183, ('Low', 'MSFT')#184, ('Open', 'MSFT')#185, ('Volume', 'MSFT')#186L]\n               +- Project [('Date', '')#181 AS ('Date',_'')#218, ('Close', 'MSFT')#182, ('High', 'MSFT')#183, ('Low', 'MSFT')#184, ('Open', 'MSFT')#185, ('Volume', 'MSFT')#186L]\n                  +- LogicalRDD [('Date', '')#181, ('Close', 'MSFT')#182, ('High', 'MSFT')#183, ('Low', 'MSFT')#184, ('Open', 'MSFT')#185, ('Volume', 'MSFT')#186L], false\n"
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyP/YR2s7/cCgy7nCSp8Yxd4",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "display_name": "Python 3",
+      "name": "python3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
